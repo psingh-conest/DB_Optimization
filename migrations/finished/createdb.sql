@@ -1,1 +1,0 @@
-CREATE DATABASE subscriber_db;
