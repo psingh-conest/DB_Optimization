@@ -1,0 +1,46 @@
+---
+- name: Start and maintain database
+  hosts: localhost
+  tasks:
+  - name: Remove mysql.txt file (delete file)
+    ansible.builtin.file:
+      path: /tmp/mysqldown.txt
+      state: absent
+
+  - name: Ansible hello world
+    ansible.builtin.debug:
+      msg: Hello from ansible in up.yaml
+  - name: start mysql
+    ansible.builtin.shell: sudo service mysql start > /tmp/mysql.txt
+    args:
+      creates: /tmp/mysql.txt
+  - name: created database
+    ansible.builtin.shell: sudo mysql -u root < migrations/createdb.sql && mv migrations/createdb.sql migrations/finished
+    args:
+      creates: migrations/finished/createdb.sql
+
+  - name: Install Flyway
+    ansible.builtin.shell: |
+      curl -L https://repo1.maven.org/maven2/org/flywaydb/flyway-commandline/10.5.0/flyway-commandline-10.5.0-linux-x64.tar.gz -o flyway.tar.gz
+      tar -xzf flyway.tar.gz
+      sudo mv flyway-10.5.0 /usr/local/flyway
+      sudo ln -s /usr/local/flyway/flyway /usr/local/bin/flyway
+    args:
+      creates: /usr/local/bin/flyway
+
+  - name: Configure Flyway
+    ansible.builtin.copy:
+      dest: /usr/local/flyway/conf/flyway.conf
+      content: |
+        flyway.url=jdbc:mysql://127.0.0.1:3306/subscriber_db
+        flyway.user=root
+        flyway.password=
+        flyway.schemas=public
+        flyway.locations=filesystem:migrations
+
+  - name: Apply migrations using Flyway
+    ansible.builtin.shell: /usr/local/flyway/flyway -locations=filesystem:/workspaces/DB_Automation/migrations migrate
+    args:
+      chdir: /usr/local/flyway
+
+
