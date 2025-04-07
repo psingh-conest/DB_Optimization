@@ -1,2 +1,4 @@
+kagglehub
+pandas
 mysql-connector-python
 ansible
