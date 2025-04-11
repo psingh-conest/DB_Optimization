@@ -1,14 +1,35 @@
-## Stakeholders & Search Goals
+### Query Performance Analysis
 
-**1. Business Analyst**
-- Goal: Identify high-value orders (`amount > 5000`) to study customer behavior.
-- Indexing reduced query time from 3s to 0.3s.
+**Scalar Field Test:**
+- Query: `SELECT * FROM orders WHERE amount > 500;`
+- Time Before Index: 
+- Time After Index: 
 
-**2. Marketing Team**
-- Goal: Run keyword-based product searches (e.g., "celular", "tv smart") for trending products.
-- Full-text index improved performance from full table scan (4s) to indexed search (0.5s).
+**Full-Text Search:**
+- Query: `MATCH(product_name) AGAINST('wireless headphones')`
+- Time Before Index: 
+- Time After Index: 
 
-## EXPLAIN Output Analysis
+**EXPLAIN Findings:**
+- Scalar query used full table scan before index
+- Full-text search used FTS index after creation
 
-- Before indexing: full table scan, rows examined > 80,000
-- After indexing: index used, key: `ft_product`, rows examined ~200
+---
+
+### Who Benefits from These Queries?
+
+1. **Sales Analysts**:
+   - Want to filter high-value orders quickly → scalar indexing improves productivity.
+
+2. **Customer Support Teams**:
+   - Search products by name → full-text index allows faster case lookups.
+
+3. **Business Intelligence Teams**:
+   - Aggregating large queries for dashboards → index optimization helps real-time reporting.
+
+---
+
+### Conclusion
+
+Indexing drastically improved query times. This optimization supports faster customer insights and business decisions, saving time and enhancing user experience across the board.
+

@@ -1,0 +1,30 @@
+---
+- name: Add index
+  hosts: localhost
+  tasks:
+
+    - name: Start MySQL
+      become: true
+      ansible.builtin.service:
+        name: mysql
+        state: started
+
+    - name: Create index on orderID
+      community.mysql.mysql_query:
+        login_host: 127.0.0.1
+        login_user: ecommerce_user
+        login_password: ""
+        login_db: brazilian_ecommerce
+        login_port: 3306
+        query: |
+          CREATE INDEX idx_order ON Orders (order_id);
+
+    - name: Create index on order status
+      community.mysql.mysql_query:
+        login_host: 127.0.0.1
+        login_user: ecommerce_user
+        login_password: ""
+        login_db: brazilian_ecommerce
+        login_port: 3306
+        query: |
+          CREATE FULLTEXT INDEX idx_order_status ON Orders (order_status);         
