@@ -1,36 +1,22 @@
-- name: Setup MySQL with ecommerce data
+---
+- name: Start and maintain database
   hosts: localhost
-  connection: local
-  vars_files:
-    - group_vars/all.yml
-
   tasks:
-    - name: Ensure MySQL is running
-      docker_container:
-        name: mysql
-        image: mysql:8
-        state: started
-        env:
-          MYSQL_ROOT_PASSWORD: "{{ mysql_root_password }}"
-          MYSQL_DATABASE: "{{ mysql_database }}"
-        ports:
-          - "3306:3306"
+  - name: Remove mysql.txt file (delete file)
+    ansible.builtin.file:
+      path: /tmp/mysqldown.txt
+      state: absent
 
-    - name: Wait for MySQL to be available
-      wait_for:
-        port: 3306
-        delay: 10
+  - name: Ansible hello world
+    ansible.builtin.debug:
+      msg: Hello from ansible in up.yaml
+  - name: start mysql
+    ansible.builtin.shell: sudo service mysql start > /tmp/mysql.txt
+    args:
+      creates: /tmp/mysql.txt
+  - name: created database
+    ansible.builtin.shell: sudo mysql -u root < migrations/createdb.sql && mv migrations/createdb.sql migrations/finished
+    args:
+      creates: migrations/finished/createdb.sql
 
-    - name: Create schema and tables
-      mysql_db:
-        name: "{{ mysql_database }}"
-        state: present
-        login_user: root
-        login_password: "{{ mysql_root_password }}"
-
-    - name: Import data from CSV (example table)
-      shell: |
-        docker exec -i mysql mysql -uroot -p{{ mysql_root_password }} {{ mysql_database }} \
-        -e "LOAD DATA INFILE '/var/lib/mysql-files/olist_orders_dataset.csv' \
-            INTO TABLE orders FIELDS TERMINATED BY ',' ENCLOSED BY '\"' \
-            LINES TERMINATED BY '\n' IGNORE 1 LINES;"
+    

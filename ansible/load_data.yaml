@@ -1,0 +1,43 @@
+---
+- name: Load data to database
+  hosts: localhost
+  tasks:
+
+    - name: Start MySQL
+      become: true
+      ansible.builtin.service:
+        name: mysql
+        state: started
+
+    - name: Create orders table (example)
+      community.mysql.mysql_query:
+        login_host: 127.0.0.1
+        login_user: ecommerce_user
+        login_password: ""
+        login_db: brazilian_ecommerce
+        login_port: 3306
+        query: |
+          CREATE TABLE IF NOT EXISTS Orders  (
+            order_id char(32),
+            customer_id char(32),
+            order_status varchar(255),
+            order_purchase_timestamp varchar(255),
+            order_approved_at varchar(255),
+            order_delivered_carrier_date varchar(255),
+            order_delivered_customer_date varchar(255),
+            order_estimated_delivery_date varchar(255)
+          );
+          
+    - name: Load CSV into orders table using shell
+      ansible.builtin.shell: |
+        mysql --local-infile=1 -h 127.0.0.1 -u ecommerce_user -D brazilian_ecommerce -e "
+          LOAD DATA LOCAL INFILE '/workspaces/DB_Optimization/data/olist_orders_dataset.csv'
+          INTO TABLE Orders
+          FIELDS TERMINATED BY ',' 
+          ENCLOSED BY '\"' 
+          LINES TERMINATED BY '\n'
+          IGNORE 1 ROWS;"
+          
+
+
+

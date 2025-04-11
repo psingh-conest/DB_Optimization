@@ -1,0 +1,5 @@
+CREATE DATABASE IF NOT EXISTS brazilian_ecommerce;
+Use brazilian_ecommerce;
+CREATE USER 'ecommerce_user'@'127.0.0.1' IDENTIFIED BY '';
+GRANT ALL PRIVILEGES ON *.* TO 'ecommerce_user'@'127.0.0.1' WITH GRANT OPTION;
+FLUSH PRIVILEGES;
